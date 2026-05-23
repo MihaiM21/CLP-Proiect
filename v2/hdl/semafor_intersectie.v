@@ -13,11 +13,11 @@
 // Descriere: Modul top-level care instantiaza 4 module
 //            semafor_directie si orchestreaza secventa
 // ============================================================
-module semafor_intersectie (
+module semafor_intersectie #(parameter CLK_FREQ = 10_000_000) (
     input  wire clk_i,
     input  wire reset_n_i,
     input  wire service_i,
-    input  wire pietoni_btn_i,       // buton pietoni comun (sau per-directie, conform cerintei)
+    input  wire pietoni_btn_i,  
 
     // Iesiri Nord
     output wire rosu_auto_N_o,
@@ -48,24 +48,29 @@ module semafor_intersectie (
     output wire verde_pietoni_V_o
 );
 
-// --------------------------------------------------------
+// Debouncer pentru butonul pietoni 20ms
+wire pietoni_btn_debounced;
+debouncer #(
+    .CLK_FREQ    (CLK_FREQ),
+    .DEBOUNCE_MS (20)
+) inst_debouncer (
+    .clk_i          (clk_i),
+    .reset_n_i      (reset_n_i),
+    .btn_i          (pietoni_btn_i),
+    .btn_debounced_o(pietoni_btn_debounced)
+);
+
 // Parametri varianta 11
-// --------------------------------------------------------
 localparam C1_N = 28; // Nord  verde [s]
 localparam C2_S = 26; // Sud   verde [s]
 localparam C3_E = 15; // Est   verde [s]
 localparam C4_V = 29; // Vest  verde [s]
-// C5 si C6 sunt definiti in modulul semafor_directie ca localparam
 
-// --------------------------------------------------------
 // Semnale de start si incheiat pentru fiecare directie
-// --------------------------------------------------------
 reg  start_N, start_S, start_E, start_V;
 wire done_N,  done_S,  done_E,  done_V;
 
-// --------------------------------------------------------
 // Secventa: S -> E -> V -> N  (varianta 11)
-// --------------------------------------------------------
 // Codificam secventa ca o masina de stari simpla
 localparam [2:0]
     SEQ_IDLE = 3'd0,
@@ -98,7 +103,7 @@ always @(posedge clk_i or negedge reset_n_i) begin
 
         case (seq_state)
             SEQ_IDLE: begin
-                // Pornim cu Sud (primul in secventa S->E->V->N)
+                // Pornim cu Sud
                 start_S   <= 1;
                 seq_state <= SEQ_S;
             end
@@ -137,20 +142,17 @@ always @(posedge clk_i or negedge reset_n_i) begin
     end
 end
 
-// --------------------------------------------------------
 // Instantiere module semafor_directie
-// --------------------------------------------------------
-
-// --- Nord ---
+// Nord
 semafor_directie #(
-    .CLK_FREQ (10_000_000),
+    .CLK_FREQ (CLK_FREQ),
     .C_VERDE  (C1_N)
 ) inst_nord (
     .clk_i               (clk_i),
     .reset_n_i           (reset_n_i),
     .service_i           (service_i),
     .start_i             (start_N),
-    .pietoni_btn_i       (pietoni_btn_i),
+    .pietoni_btn_i       (pietoni_btn_debounced),
     .rosu_auto_o         (rosu_auto_N_o),
     .galben_auto_o       (galben_auto_N_o),
     .verde_auto_o        (verde_auto_N_o),
@@ -159,16 +161,16 @@ semafor_directie #(
     .secventa_incheiata_o(done_N)
 );
 
-// --- Sud ---
+// Sud
 semafor_directie #(
-    .CLK_FREQ (10_000_000),
+    .CLK_FREQ (CLK_FREQ),
     .C_VERDE  (C2_S)
 ) inst_sud (
     .clk_i               (clk_i),
     .reset_n_i           (reset_n_i),
     .service_i           (service_i),
     .start_i             (start_S),
-    .pietoni_btn_i       (pietoni_btn_i),
+    .pietoni_btn_i       (pietoni_btn_debounced),
     .rosu_auto_o         (rosu_auto_S_o),
     .galben_auto_o       (galben_auto_S_o),
     .verde_auto_o        (verde_auto_S_o),
@@ -177,16 +179,16 @@ semafor_directie #(
     .secventa_incheiata_o(done_S)
 );
 
-// --- Est ---
+// Est
 semafor_directie #(
-    .CLK_FREQ (10_000_000),
+    .CLK_FREQ (CLK_FREQ),
     .C_VERDE  (C3_E)
 ) inst_est (
     .clk_i               (clk_i),
     .reset_n_i           (reset_n_i),
     .service_i           (service_i),
     .start_i             (start_E),
-    .pietoni_btn_i       (pietoni_btn_i),
+    .pietoni_btn_i       (pietoni_btn_debounced),
     .rosu_auto_o         (rosu_auto_E_o),
     .galben_auto_o       (galben_auto_E_o),
     .verde_auto_o        (verde_auto_E_o),
@@ -195,16 +197,16 @@ semafor_directie #(
     .secventa_incheiata_o(done_E)
 );
 
-// --- Vest ---
+// Vest
 semafor_directie #(
-    .CLK_FREQ (10_000_000),
+    .CLK_FREQ (CLK_FREQ),
     .C_VERDE  (C4_V)
 ) inst_vest (
     .clk_i               (clk_i),
     .reset_n_i           (reset_n_i),
     .service_i           (service_i),
     .start_i             (start_V),
-    .pietoni_btn_i       (pietoni_btn_i),
+    .pietoni_btn_i       (pietoni_btn_debounced),
     .rosu_auto_o         (rosu_auto_V_o),
     .galben_auto_o       (galben_auto_V_o),
     .verde_auto_o        (verde_auto_V_o),

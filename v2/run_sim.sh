@@ -10,9 +10,11 @@ echo "============================================"
 
 # Compilare
 iverilog -o sim_semafor \
-    semafor_directie.v \
-    semafor_intersectie.v \
-    tb_semafor_intersectie.v \
+    hdl/debouncer.v \
+    hdl/div_frecventa.v \
+    hdl/semafor_directie.v \
+    hdl/semafor_intersectie.v \
+    tb/tb_semafor_intersectie.v \
     -Wall
 
 if [ $? -ne 0 ]; then

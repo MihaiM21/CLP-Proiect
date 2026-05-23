@@ -177,6 +177,19 @@ IEȘIRI (60 total):
           rosu_pietoni_V_o, verde_pietoni_V_o
 ```
 
+### Diagrame vizuale
+
+Am inclus două diagrame care ilustrează arhitectura și FSM-urile proiectului:
+
+- Diagrama sistemului (orchestrator și module direcții):
+
+  ![Diagramă Sistem](imagini/raw.png)
+
+- Diagrama mașinii de stări pentru o direcție (FSM):
+
+  ![Diagrama FSM direcție](imagini/raw2.png)
+
+
 ---
 
 ## Mașini de Stări (FSM)

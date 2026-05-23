@@ -40,22 +40,13 @@ localparam [2:0]
 
 reg [2:0] state;
 
-// Blink 0.5 Hz
-reg [31:0] blink_cnt;
-reg        blink_sig;
-
-always @(posedge clk_i or negedge reset_n_i) begin
-    if (!reset_n_i) begin
-        blink_cnt <= 0;
-        blink_sig <= 0;
-    end else begin
-        if (blink_cnt >= (CLK_FREQ - 1)) begin
-            blink_cnt <= 0;
-            blink_sig <= ~blink_sig;
-        end else
-            blink_cnt <= blink_cnt + 1;
-    end
-end
+// Blink 0.5 Hz 
+wire blink_sig;
+div_frecventa #(.DIV_FACTOR(CLK_FREQ)) inst_blink (
+    .clk_i     (clk_i),
+    .reset_n_i (reset_n_i),
+    .clk_div_o (blink_sig)
+);
 
 // Latch buton pietoni
 reg btn_latch;
